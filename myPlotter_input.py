@@ -87,6 +87,9 @@ def makeresplot(hlist, algo, suffix, fileName, plotscaffold):
     hmatched = [res.Get(plotscaffold.format(al = algo, st = chambTag[ich], ty = "matched")) for ich in range(4)]
     htotal   = [res.Get(plotscaffold.format(al = algo, st = chambTag[ich], ty = "total")) for ich in range(4)]
 
+
+    print plotscaffold.format(al = algo, st = "MB1", ty = "matched")
+
     resplot = r.TH1F("hEff_{al}_{su}".format(al = algo, su = suffix), "", 20, -0.5, 19.5)
     
     ibin = 1
@@ -298,7 +301,7 @@ def combineEffPlots(hlist, legends, plottingStuff, path, savescaffold):
     return
 
 
-def combineresplots(hlist, legends, plottingStuff, path, savescaffold, fil):
+def combineresplots(hlist, legends, plottingStuff, path, savescaffold, fil=None):
     chambTag = ["MB1", "MB2", "MB3", "MB4"]
     print "Combining list of plots"
     if len(hlist) == 0: raise RuntimeError("Empty list of plots")
@@ -327,10 +330,11 @@ def combineresplots(hlist, legends, plottingStuff, path, savescaffold, fil):
         # hlist[iplot].SetMarkerColor(plottingStuff['markercolordir'][hlist[iplot].GetName()])
         hlist[iplot].SetMarkerStyle(plottingStuff['markertypedir'][iplot])
         hlist[iplot].SetMarkerColor(plottingStuff['markercolordir'][iplot])
-        leg.AddEntry(hlist[iplot], legends[iplot], "P")
+        if legends:
+            leg.AddEntry(hlist[iplot], legends[iplot], "P")
         hlist[iplot].Draw("P,hist" + (iplot != 0) * "same")
-
-    leg.Draw()
+    if legends:
+        leg.Draw()
 
     textlist = []
     linelist = []
@@ -350,9 +354,10 @@ def combineresplots(hlist, legends, plottingStuff, path, savescaffold, fil):
     firsttex.Draw("same");
 
     secondtext = r.TLatex()
-    toDisplay = r.TString()
-    if (lookForPU(fil) != -1) : toDisplay  = r.TString("14 TeV, " + str(lookForPU(fil))  +" PU")
-    else : toDisplay  = r.TString("14 TeV")
+    toDisplay = r.TString(getattr(plottingStuff, "right_top_text", ""))
+    #if (lookForPU(fil) != -1) : toDisplay  = r.TString("14 TeV, " + str(lookForPU(fil))  +" PU")
+    #else : toDisplay  = r.TString("14 TeV")
+    
     secondtext.SetTextSize(0.035)
     secondtext.SetTextAlign(31)
     secondtext.DrawLatexNDC(0.90, 0.91, toDisplay.Data())
